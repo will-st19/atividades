@@ -1,44 +1,45 @@
 import random
 
-OPERATORS = ['+', '-', '*', ':']
-BRACKETS = [('(', ')'), ('[', ']'), ('{', '}')]
+# Definir caracteres de colchetes, parênteses e chaves
+BRACKETS = [("(", ")"), ("[", "]"), ("{", "}")]
 
+# Definir operadores matemáticos
+OPERATORS = ["+", "-", "*", ":", "÷"]
+
+# Definir intervalos de valores para cada operando
+INTERVALS = [
+    (1, 20),
+    (1, 20),
+    (1, 20),
+    (1, 10),
+    (2, 10)
+]
+
+# Função para gerar uma expressão matemática aleatória
 def generate_expression():
-    # Definindo a profundidade da expressão (quantidade de níveis de aninhamento)
-    depth = random.randint(2, 4)
-
-    # Lista para armazenar a expressão
-    expression = []
-
-    # Gerando o primeiro número
-    expression.append(str(random.randint(1, 50)))
-
-    # Gerando os próximos números e operadores
-    for i in range(depth):
-        expression.append(random.choice(OPERATORS))
-        bracket = random.choice(BRACKETS)
-        expression.append(bracket[0])
-        expression.append(str(random.randint(1, 50)))
-
-    # Fechando os parênteses, colchetes e chaves
-    for i in range(depth):
-        bracket = expression.pop()
-        opening_bracket = [b[0] for b in BRACKETS].index(bracket)
-        expression.append(BRACKETS[opening_bracket][1])
-
-    # Juntando todos os elementos da lista em uma única string
-    expression_string = ''.join(expression)
-
-    # Avaliando a expressão
+    # Escolher um caractere de abertura aleatório
+    bracket = random.choice("([{")
+    # Escolher um índice aleatório para o caractere de abertura escolhido
+    opening_bracket_index = [b[0] for b in BRACKETS].index(bracket)
+    # Obter o caractere de fechamento correspondente
+    closing_bracket = BRACKETS[opening_bracket_index][1]
+    # Escolher um operador matemático aleatório
+    operator = random.choice(OPERATORS)
+    # Escolher aleatoriamente dois números inteiros no intervalo especificado
+    operand1 = random.randint(*INTERVALS[0])
+    operand2 = random.randint(*INTERVALS[1])
+    # Concatenar a expressão como uma string
+    expression_string = f"{bracket}{operand1} {operator} {operand2}{closing_bracket}"
+    # Avaliar a expressão e garantir que o resultado é um número inteiro
     result = eval(expression_string)
-
-    # Se o resultado não for um número inteiro, gera uma nova expressão
-    if not isinstance(result, int):
-        return generate_expression()
-
-    # Retornando a expressão como string
+    while not isinstance(result, int):
+        operand1 = random.randint(*INTERVALS[0])
+        operand2 = random.randint(*INTERVALS[1])
+        expression_string = f"{bracket}{operand1} {operator} {operand2}{closing_bracket}"
+        result = eval(expression_string)
+    # Retornar a expressão como uma string
     return expression_string
 
-# Gerando 10 expressões
+# Testar a função gerando 10 expressões aleatórias
 for i in range(10):
     print(generate_expression())
