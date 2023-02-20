@@ -4,10 +4,13 @@ import random
 BRACKETS = [("(", ")"), ("[", "]"), ("{", "}")]
 
 # Definir operadores matemáticos
-OPERATORS = ["+", "-", "*", ":", "÷"]
+OPERATORS = ["+", "-", "*", ":", "//"]
 
 # Definir intervalos de valores para cada operando
 INTERVALS = [(1, 20), (1, 20), (1, 20), (1, 10), (2, 10)]
+
+# Número máximo de tentativas de simplificação de uma expressão
+MAX_SIMPLIFY_ATTEMPTS = 10
 
 
 # Função para gerar uma expressão matemática aleatória
@@ -39,18 +42,10 @@ def generate_expression():
 
 
 def simplify_expression(expression_string):
-    # Se a expressão tem apenas um caractere e é uma chave, não precisa simplificar
-    if (
-        len(expression_string) == 3
-        and expression_string[0] == "{"
-        and expression_string[2] == "}"
-    ):
-        return expression_string
-
     # Remove espaços em branco da expressão
     expression_string = expression_string.replace(" ", "")
 
-    # Aplica a simplificação recursivamente enquanto for possível
+    # Simplifica a expressão dentro de um bloco de parênteses, colchetes ou chaves
     changed = True
     while changed:
         changed = False
@@ -82,7 +77,14 @@ def simplify_expression(expression_string):
         if not changed:
             break
 
-    return expression_string
+    # Verifica se a expressão pode ser avaliada como um número
+    try:
+        result = eval(expression_string.replace("÷", "/"))
+        if not isinstance(result, (int, float)):
+            raise ValueError
+        return str(int(result))
+    except:
+        return expression_string
 
 
 # Testar a função gerando 10 expressões aleatórias
