@@ -1,92 +1,52 @@
 import random
 
-# Definir caracteres de colchetes, parênteses e chaves
-BRACKETS = [("(", ")"), ("[", "]"), ("{", "}")]
+class Node:
+    def __init__(self, value=None, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
 
-# Definir operadores matemáticos
-OPERATORS = ["+", "-", "*", ":", "//"]
+    def is_operator(self):
+        return self.value in ["+", "-", "*", "/"]
 
-# Definir intervalos de valores para cada operando
-INTERVALS = [(1, 20), (1, 20), (1, 20), (1, 10), (2, 10)]
+    def evaluate(self):
+        if self.is_operator():
+            left_value = self.left.evaluate()
+            right_value = self.right.evaluate()
+            if self.value == "+":
+                return left_value + right_value
+            elif self.value == "-":
+                return left_value - right_value
+            elif self.value == "*":
+                return left_value * right_value
+            elif self.value == "/":
+                return left_value / right_value
+        else:
+            return self.value
 
-# Número máximo de tentativas de simplificação de uma expressão
-MAX_SIMPLIFY_ATTEMPTS = 10
-
-
-# Função para gerar uma expressão matemática aleatória
-def generate_expression():
-    # Escolher um caractere de abertura aleatório
-    bracket = random.choice("([{")
-    # Escolher um índice aleatório para o caractere de abertura escolhido
-    opening_bracket_index = [b[0] for b in BRACKETS].index(bracket)
-    # Obter o caractere de fechamento correspondente
-    closing_bracket = BRACKETS[opening_bracket_index][1]
-    # Escolher um operador matemático aleatório
-    operator = random.choice(OPERATORS)
-    # Escolher aleatoriamente dois números inteiros no intervalo especificado
-    operand1 = random.randint(*INTERVALS[0])
-    operand2 = random.randint(*INTERVALS[1])
-    # Concatenar a expressão como uma string
-    expression_string = f"{bracket}{operand1} {operator} {operand2}{closing_bracket}"
-    # Avaliar a expressão e garantir que o resultado é um número inteiro
-    result = eval(expression_string)
-    while not isinstance(result, int):
-        operand1 = random.randint(*INTERVALS[0])
-        operand2 = random.randint(*INTERVALS[1])
-        expression_string = (
-            f"{bracket}{operand1} {operator} {operand2}{closing_bracket}"
-        )
-        result = eval(simplify_expression(expression_string.replace("÷", "/")))
-    # Retornar a expressão como uma string
-    return expression_string
+    def __repr__(self):
+        if self.is_operator():
+            return f"({self.left} {self.value} {self.right})"
+        else:
+            return str(self.value)
 
 
-def simplify_expression(expression_string):
-    # Remove espaços em branco da expressão
-    expression_string = expression_string.replace(" ", "")
+def generate_expression(depth):
+    if depth == 0:
+        # Gerar um número aleatório entre 1 e 10
+        return Node(random.randint(1, 10))
 
-    # Simplifica a expressão dentro de um bloco de parênteses, colchetes ou chaves
-    changed = True
-    while changed:
-        changed = False
-        for opening_bracket, closing_bracket in BRACKETS:
-            # Procura o primeiro bloco de parênteses, colchetes ou chaves
-            start = expression_string.find(opening_bracket)
-            if start != -1:
-                # Procura o último caractere correspondente ao bloco
-                count = 1
-                for end in range(start + 1, len(expression_string)):
-                    if expression_string[end] == opening_bracket:
-                        count += 1
-                    elif expression_string[end] == closing_bracket:
-                        count -= 1
-                    if count == 0:
-                        break
+    # Escolher um operador aleatório
+    operator = random.choice(["+", "-", "*", "/"])
 
-                # Simplifica a expressão dentro do bloco
-                simplified = simplify_expression(expression_string[start + 1 : end])
-                if simplified != expression_string[start + 1 : end]:
-                    # Substitui o bloco pela expressão simplificada
-                    expression_string = (
-                        expression_string[: start + 1]
-                        + simplified
-                        + expression_string[end:]
-                    )
-                    changed = True
-                    break
-        if not changed:
-            break
+    # Gerar recursivamente a expressão esquerda e a expressão direita
+    left_expression = generate_expression(depth - 1)
+    right_expression = generate_expression(depth - 1)
 
-    # Verifica se a expressão pode ser avaliada como um número
-    try:
-        result = eval(expression_string.replace("÷", "/"))
-        if not isinstance(result, (int, float)):
-            raise ValueError
-        return str(int(result))
-    except:
-        return expression_string
+    # Retornar um novo nó com o operador e as expressões filhas
+    return Node(operator, left=left_expression, right=right_expression)
 
 
-# Testar a função gerando 10 expressões aleatórias
 for i in range(10):
-    print(generate_expression())
+    expression = generate_expression(2)
+    print(expression, "=", expression.evaluate())
