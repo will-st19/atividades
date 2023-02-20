@@ -1,52 +1,58 @@
+import sympy
 import random
 
+
 class Node:
-    def __init__(self, value=None, left=None, right=None):
-        self.value = value
+    def __init__(self, left, right, operator):
         self.left = left
         self.right = right
-
-    def is_operator(self):
-        return self.value in ["+", "-", "*", "/"]
+        self.operator = operator
 
     def evaluate(self):
-        if self.is_operator():
-            left_value = self.left.evaluate()
-            right_value = self.right.evaluate()
-            if self.value == "+":
-                return left_value + right_value
-            elif self.value == "-":
-                return left_value - right_value
-            elif self.value == "*":
-                return left_value * right_value
-            elif self.value == "/":
-                return left_value / right_value
-        else:
-            return self.value
+        left_val = self.left.evaluate() if isinstance(self.left, Node) else self.left
+        right_val = (
+            self.right.evaluate() if isinstance(self.right, Node) else self.right
+        )
 
-    def __repr__(self):
-        if self.is_operator():
-            return f"({self.left} {self.value} {self.right})"
+        if self.operator == "+":
+            return left_val + right_val
+        elif self.operator == "-":
+            return left_val - right_val
+        elif self.operator == "*":
+            return left_val * right_val
+        elif self.operator == "/" and right_val != 0:
+            return left_val / right_val
         else:
+            raise ValueError("Operador inválido")
+
+    def __str__(self):
+        if self.left is None and self.right is None:
             return str(self.value)
+        left = str(self.left) if self.left is not None else ""
+        right = str(self.right) if self.right is not None else ""
+        op = self.operator if self.operator is not None else ""
+        return f"({left} {op} {right})"
 
 
 def generate_expression(depth):
     if depth == 0:
-        # Gerar um número aleatório entre 1 e 10
-        return Node(random.randint(1, 10))
+        return random.randint(1, 10)
 
-    # Escolher um operador aleatório
+    left = generate_expression(depth - 1)
+    right = generate_expression(depth - 1)
     operator = random.choice(["+", "-", "*", "/"])
 
-    # Gerar recursivamente a expressão esquerda e a expressão direita
-    left_expression = generate_expression(depth - 1)
-    right_expression = generate_expression(depth - 1)
-
-    # Retornar um novo nó com o operador e as expressões filhas
-    return Node(operator, left=left_expression, right=right_expression)
+    return Node(left, right, operator)
 
 
-for i in range(10):
-    expression = generate_expression(2)
-    print(expression, "=", expression.evaluate())
+# for i in range(5):
+#     expression = generate_expression(depth=2)
+#     print(expression, "=", expression.evaluate())
+
+for i in range(5):
+    while True:
+        expression = generate_expression(depth=3)
+        result = expression.evaluate()
+        if isinstance(result, int) and result >= 0:
+            break
+    print(expression, "=", result)
