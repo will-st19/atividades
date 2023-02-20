@@ -1,7 +1,7 @@
 import random
 
-OPERATORS = ["+", "-", "*", ":"]
-
+OPERATORS = ['+', '-', '*', ':']
+BRACKETS = [('(', ')'), ('[', ']'), ('{', '}')]
 
 def generate_expression():
     # Definindo a profundidade da expressão (quantidade de níveis de aninhamento)
@@ -16,15 +16,18 @@ def generate_expression():
     # Gerando os próximos números e operadores
     for i in range(depth):
         expression.append(random.choice(OPERATORS))
-        expression.append(random.choice(["(", "[", "{"]))
+        bracket = random.choice(BRACKETS)
+        expression.append(bracket[0])
         expression.append(str(random.randint(1, 50)))
 
     # Fechando os parênteses, colchetes e chaves
     for i in range(depth):
-        expression.append(random.choice([")", "]", "}"]))
+        bracket = expression.pop()
+        opening_bracket = [b[0] for b in BRACKETS].index(bracket)
+        expression.append(BRACKETS[opening_bracket][1])
 
     # Juntando todos os elementos da lista em uma única string
-    expression_string = "".join(expression)
+    expression_string = ''.join(expression)
 
     # Avaliando a expressão
     result = eval(expression_string)
@@ -35,7 +38,6 @@ def generate_expression():
 
     # Retornando a expressão como string
     return expression_string
-
 
 # Gerando 10 expressões
 for i in range(10):
